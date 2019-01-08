@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Entities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Dtos\TaskDto.cs" />
+    <Compile Remove="Dtos\ProofDto.cs" />
+  </ItemGroup>
+</Project>
