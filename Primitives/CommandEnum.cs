@@ -3,7 +3,7 @@
 namespace Primitives
 {
     [Flags]
-    enum CommandEnum
+    public enum CommandEnum
     {
         Subscribe,
         Unsubscribe,

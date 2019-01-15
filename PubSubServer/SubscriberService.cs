@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Service;
 using State;
 
 namespace PubSubServer
@@ -11,6 +12,12 @@ namespace PubSubServer
     public class SubscriberService
     {
         private static ManualResetEvent _resetEvent = new ManualResetEvent(false);
+        private readonly TaskService _taskService;
+
+        public SubscriberService(TaskService taskService)
+        {
+            _taskService = taskService;
+        }
 
         public void Start()
         {

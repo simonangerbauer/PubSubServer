@@ -5,14 +5,24 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Data;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Primitives;
+using Service;
 using State;
 
 namespace PubSubServer
 {
-    public class PublishService
+    public class PublisherService
     {
         private static ManualResetEvent _resetEvent = new ManualResetEvent(false);
+        private readonly TaskService _taskService;
+
+        public PublisherService(TaskService taskService)
+        {
+            _taskService = taskService;
+        }
 
         public void Start()
         {
@@ -50,6 +60,12 @@ namespace PubSubServer
             }
         }
 
+        public static void ReplyToSender(String message, SocketState socketState)
+        {
+            var byteData = Encoding.ASCII.GetBytes(message);
+            socketState.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), socketState.Socket);
+        }
+
         private static void AcceptCallback(IAsyncResult result)
         {
             _resetEvent.Set();
@@ -60,7 +76,6 @@ namespace PubSubServer
             handler.BeginReceive(state.Buffer, 0, SocketState.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
 
         }
-
 
         private static void ReceiveCallback(IAsyncResult result)
         {
@@ -75,9 +90,7 @@ namespace PubSubServer
                 if (message.IndexOf("^@", StringComparison.Ordinal) > -1)
                 {
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", message.Length, message);
-                    //TODO json parsing
-                    //JObject json = JObject.Parse(message);
-                    //json.Fir
+                    Queue.Enqueue(state);
                     Publish(state.Socket, message, "topic");
                 }
                 else
@@ -144,7 +157,20 @@ namespace PubSubServer
                 foreach (SocketState subscriber in subscribers)
                 {
                     subscriber.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), subscriber.Socket);
+                }
+            }
+        }
 
+        public static void Publish(String message, String topic)
+        {
+            IEnumerable<SocketState> subscribers = Filtering.Filter.GetSubscribers(topic);
+            var byteData = Encoding.ASCII.GetBytes(message);
+
+            if (subscribers != null)
+            {
+                foreach (SocketState subscriber in subscribers)
+                {
+                    subscriber.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), subscriber.Socket);
                 }
             }
         }

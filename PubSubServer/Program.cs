@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using Service;
 
 namespace PubSubServer
 {
@@ -7,11 +8,16 @@ namespace PubSubServer
     {
         static void Main(string[] args)
         {
-            PublishService publishService = new PublishService();
+            var taskService = new TaskService();
+
+            PublisherService publishService = new PublisherService(taskService);
             publishService.Start();
 
-            SubscriberService subscriberService = new SubscriberService();
+            SubscriberService subscriberService = new SubscriberService(taskService);
             subscriberService.Start();
+
+            QueueWorker queueWorker = new QueueWorker(taskService);
+            queueWorker.Start();
         }
 
     }

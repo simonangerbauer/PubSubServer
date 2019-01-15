@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,5 +10,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\State\State.csproj" />
+    <ProjectReference Include="..\Primitives\Primitives.csproj" />
+    <ProjectReference Include="..\Service\Service.csproj" />
   </ItemGroup>
 </Project>

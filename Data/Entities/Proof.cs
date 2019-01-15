@@ -3,11 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Data
 {
-    public class Proof
+    public class Proof : Entity
     {
-        [Key]
-        public Guid Id { get; set; }
-
         public string Title { get; set; }
     }
 }

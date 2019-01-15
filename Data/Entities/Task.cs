@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Data
 {
-    public class Task
+    public class Task : Entity
     {
-        [Key]
-        public Guid Id { get; set; }
-
         public IEnumerable<Proof> Proofs { get; set; }
 
         public String Officers { get; set; }
