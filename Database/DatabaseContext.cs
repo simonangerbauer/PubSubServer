@@ -11,7 +11,7 @@ namespace Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Filename=./tasks.sqlite");
+            optionsBuilder.UseSqlite("Filename=/Users/simonangerbauer/Documents/tasks.sqlite");
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Data;
 using Primitives;
 using Microsoft.EntityFrameworkCore;
+using Database;
 
 namespace Service
 {
@@ -12,7 +13,7 @@ namespace Service
     {
         public async Task<IEnumerable<Data.Task>> GetAsync()
         {
-            return await GetQuery<Data.Task>().OrderByDescending(t => t.Due).ToListAsync();
+            return await Context.GetQuery<Data.Task>().OrderByDescending(t => t.Due).ToListAsync();
         }
 
         public async Task<(StateEnum state, Data.Task data)> PostAsync(Data.Task task)

@@ -7,5 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\State\State.csproj" />
+    <ProjectReference Include="..\Primitives\Primitives.csproj" />
   </ItemGroup>
 </Project>

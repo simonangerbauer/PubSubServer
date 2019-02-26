@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Primitives;
 using State;
 
 namespace Subscriber
@@ -33,9 +34,7 @@ namespace Subscriber
                 _client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 _remoteEndPoint = new IPEndPoint(serverIPAddress, serverPort);
 
-                string topicName = "topic";
-                string Command = "Subscribe";
-                string message = Command + "," + topicName + ",^@";
+                var message = "Data.Task";
 
                 _client.BeginConnect(_remoteEndPoint, new AsyncCallback(ConnectCallback), _client);
                 _connectDone.WaitOne();
@@ -80,7 +79,7 @@ namespace Subscriber
                 {
                     var message = Encoding.ASCII.GetString(state.Buffer, 0, bytesRead);
                     state.StringBuilder.Append(message);
-                    if (message.IndexOf("^@", StringComparison.Ordinal) == -1)
+                    if (message.IndexOf(JsonTokens.EndOfMessage, StringComparison.Ordinal) == -1)
                     {
                         state.Socket.BeginReceive(state.Buffer, 0, SocketState.BufferSize, SocketFlags.None, new AsyncCallback(ReceiveCallback), state);
                     }

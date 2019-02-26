@@ -32,7 +32,8 @@ namespace PubSubServer
                     JObject json =
                         new JObject(
                             new JProperty(JsonTokens.State, state),
-                            new JProperty(JsonTokens.Data, JObject.FromObject(data)));
+                            new JProperty(JsonTokens.Data, JObject.FromObject(data)),
+                            new JProperty(JsonTokens.Topic, data.GetType().FullName));
                     switch (state)
                     {
                         case StateEnum.Unchanged:

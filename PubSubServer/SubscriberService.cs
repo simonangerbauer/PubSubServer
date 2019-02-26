@@ -65,10 +65,9 @@ namespace PubSubServer
 
         }
 
-
         private static void ReceiveCallback(IAsyncResult result)
         {
-            String message = String.Empty;
+            string message = string.Empty;
             SocketState state = (SocketState)result.AsyncState;
 
             int bytesRead = state.Socket.EndReceive(result);
@@ -76,81 +75,11 @@ namespace PubSubServer
             {
                 state.StringBuilder.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
                 message = state.StringBuilder.ToString();
-                if (message.IndexOf("^@", StringComparison.Ordinal) > -1)
+                if (!string.IsNullOrEmpty(message))
                 {
-                    string[] messageParts = message.Split(",".ToCharArray());
-                    if (!string.IsNullOrEmpty(messageParts[0]))
-                    {
-                        switch (messageParts[0])
-                        {
-                            case "Subscribe":
-                                if (!string.IsNullOrEmpty(messageParts[1]))
-                                {
-                                    Filtering.Filter.AddSubscriber(messageParts[1], state);
-                                }
-                                break;
-                            case "UnSubscribe":
-
-                                if (!string.IsNullOrEmpty(messageParts[1]))
-                                {
-                                    Filtering.Filter.RemoveSubscriber(messageParts[1], state);
-                                }
-                                break;
-                        }
-                    }
-                }
-                else
-                {
-                    state.Socket.BeginReceive(state.Buffer, 0, SocketState.BufferSize, 0,
-                    new AsyncCallback(ReceiveCallback), state);
+                    Filtering.Filter.AddSubscriber(message, state);
                 }
             }
         }
-
-
-        //private void StartListening(Socket server)
-        //{
-        //    EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
-        //    int recv = 0;
-        //    byte[] data = new byte[1024];
-        //    while (true)
-        //    {
-        //        try
-        //        {
-        //            recv = 0;
-        //            data = new byte[1024];
-        //            recv = server.ReceiveFrom(data, ref remoteEP);
-        //            string messageSendFromClient = Encoding.ASCII.GetString(data, 0, recv);
-        //            string[] messageParts = messageSendFromClient.Split(",".ToCharArray());
-        //            String command = messageParts[0];
-        //            String topicName = messageParts[1];
-        //            if (!string.IsNullOrEmpty(command))
-        //            {
-        //                if (messageParts[0] == "Publish")
-        //                {
-        //                    if (!string.IsNullOrEmpty(topicName))
-        //                    {
-        //                        List<string> eventParts =
-        //                                new List<string>(messageParts);
-        //                        eventParts.RemoveRange(0, 1);
-        //                        string message = MakeCommaSeparatedString(eventParts);
-        //                        IEnumerable<EndPoint> subscribers = Filtering.Filter.GetSubscribers(topicName);
-        //                        WorkerThreadParameters workerThreadParameters = new WorkerThreadParameters
-        //                        {
-        //                            Server = server,
-        //                            Message = message,
-        //                            Subscribers = subscribers
-        //                        };
-
-        //                        ThreadPool.QueueUserWorkItem(new WaitCallback(Publish),
-        //                                         workerThreadParameters);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        catch
-        //        { }
-        //    }
-        //}
     }
 }

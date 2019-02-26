@@ -16,7 +16,9 @@ namespace PubSubServer
         {
             try
             {
-                JObject jObject = JObject.Parse(state.StringBuilder.ToString());
+                var message = state.StringBuilder.ToString();
+                message = message.Substring(0, message.Length - JsonTokens.EndOfMessage.Length);
+                JObject jObject = JObject.Parse(message);
                 var assembly = typeof(Entity).Assembly;
                 var type = assembly.GetType(jObject.SelectToken(JsonTokens.Topic).ToString());
                 var entity = (Entity)jObject.SelectToken(JsonTokens.Data).ToObject(type);

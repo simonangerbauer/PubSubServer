@@ -14,29 +14,25 @@ namespace Service
         protected BaseService()
         {
             Context = new DatabaseContext();
+            Context.Database.EnsureCreated();
         }
-
-        public IQueryable<T> GetQuery<T>() where T : Entity
-        {
-            return Context.Query<T>().AsQueryable();
-        }
-
 
         public async Task<(StateEnum state, T data)> PostAsync<T>(T entity) where T : Entity
         {
-            var dbTask = GetQuery<T>().SingleOrDefault(t => t.Id == entity.Id);
+            var dbSet = Context.Set<T>();
+            var dbEntity = dbSet.SingleOrDefault(t => t.Id == entity.Id);
             var state = StateEnum.Unchanged;
 
-            if (dbTask != null)
+            if (dbEntity != null)
             {
-                if(entity.LastChange > dbTask.LastChange)
+                if(entity.LastChange > dbEntity.LastChange)
                 {
                     Context.Update(entity);
                     state = StateEnum.Modified;
                 }
                 else
                 {
-                    return (state, dbTask);
+                    return (state, dbEntity);
                 }
             }
             else

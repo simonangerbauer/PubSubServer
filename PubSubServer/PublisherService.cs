@@ -60,10 +60,9 @@ namespace PubSubServer
             }
         }
 
-        public static void ReplyToSender(String message, SocketState socketState)
+        public static void ReplyToSender(string message, SocketState socketState)
         {
-            var byteData = Encoding.ASCII.GetBytes(message);
-            socketState.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), socketState.Socket);
+            Send(message, new List<SocketState> { socketState });
         }
 
         private static void AcceptCallback(IAsyncResult result)
@@ -79,7 +78,7 @@ namespace PubSubServer
 
         private static void ReceiveCallback(IAsyncResult result)
         {
-            String message = String.Empty;
+            string message = string.Empty;
             SocketState state = (SocketState)result.AsyncState;
   
             int bytesRead = state.Socket.EndReceive(result);
@@ -87,11 +86,10 @@ namespace PubSubServer
             {
                 state.StringBuilder.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
                 message = state.StringBuilder.ToString();
-                if (message.IndexOf("^@", StringComparison.Ordinal) > -1)
+                if (message.IndexOf(JsonTokens.EndOfMessage, StringComparison.Ordinal) > -1)
                 {
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", message.Length, message);
                     Queue.Enqueue(state);
-                    Publish(state.Socket, message, "topic");
                 }
                 else
                 { 
@@ -101,77 +99,23 @@ namespace PubSubServer
             }
         }
 
-
-        //private void StartListening(Socket server)
-        //{
-        //    EndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
-        //    int recv = 0;
-        //    byte[] data = new byte[1024];
-        //    while (true)
-        //    {
-        //        try
-        //        {
-        //            recv = 0;
-        //            data = new byte[1024];
-        //            recv = server.ReceiveFrom(data, ref remoteEP);
-        //            string messageSendFromClient = Encoding.ASCII.GetString(data, 0, recv);
-        //            string[] messageParts = messageSendFromClient.Split(",".ToCharArray());
-        //            String command = messageParts[0];
-        //            String topicName = messageParts[1];
-        //            if (!string.IsNullOrEmpty(command))
-        //            {
-        //                if (messageParts[0] == "Publish")
-        //                {
-        //                    if (!string.IsNullOrEmpty(topicName))
-        //                    {
-        //                        List<string> eventParts =
-        //                                new List<string>(messageParts);
-        //                        eventParts.RemoveRange(0, 1);
-        //                        string message = MakeCommaSeparatedString(eventParts);
-        //                        IEnumerable<EndPoint> subscribers = Filtering.Filter.GetSubscribers(topicName);
-        //                        WorkerThreadParameters workerThreadParameters = new WorkerThreadParameters
-        //                        {
-        //                            Server = server,
-        //                            Message = message,
-        //                            Subscribers = subscribers
-        //                        };
-
-        //                        ThreadPool.QueueUserWorkItem(new WaitCallback(Publish),
-        //                                         workerThreadParameters);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        catch
-        //        { }
-        //    }
-        //}
-
-        public static void Publish(Socket handler, String message, String topic)
+        public static void Publish(string message, string topic)
         {
             IEnumerable<SocketState> subscribers = Filtering.Filter.GetSubscribers(topic);
-            var byteData = Encoding.ASCII.GetBytes(message);
 
             if (subscribers != null)
             {
-                foreach (SocketState subscriber in subscribers)
-                {
-                    subscriber.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), subscriber.Socket);
-                }
+                Send(message, subscribers);
             }
         }
 
-        public static void Publish(String message, String topic)
+        private static void Send(string message, IEnumerable<SocketState> recipients)
         {
-            IEnumerable<SocketState> subscribers = Filtering.Filter.GetSubscribers(topic);
+            message += JsonTokens.EndOfMessage;
             var byteData = Encoding.ASCII.GetBytes(message);
-
-            if (subscribers != null)
+            foreach (SocketState recipient in recipients)
             {
-                foreach (SocketState subscriber in subscribers)
-                {
-                    subscriber.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), subscriber.Socket);
-                }
+                recipient.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), recipient.Socket);
             }
         }
 

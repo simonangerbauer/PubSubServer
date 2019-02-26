@@ -13,4 +13,7 @@
     <ProjectReference Include="..\Primitives\Primitives.csproj" />
     <ProjectReference Include="..\Service\Service.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="BlockingQueue.cs" />
+  </ItemGroup>
 </Project>
