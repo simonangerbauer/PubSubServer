@@ -62,7 +62,7 @@ namespace Publisher
                 _client.BeginConnect(_remoteEndPoint, new AsyncCallback(ConnectCallback), _client);
                 _connectDone.WaitOne();
 
-                var byteData = Encoding.ASCII.GetBytes(message);
+                var byteData = Encoding.UTF8.GetBytes(message);
                 _client.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), _client);
                 _sendDone.WaitOne();
 

@@ -39,7 +39,7 @@ namespace Subscriber
                 _client.BeginConnect(_remoteEndPoint, new AsyncCallback(ConnectCallback), _client);
                 _connectDone.WaitOne();
 
-                var byteData = Encoding.ASCII.GetBytes(message);
+                var byteData = Encoding.UTF8.GetBytes(message);
                 _client.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), _client);
                 _sendDone.WaitOne();
 
@@ -77,7 +77,7 @@ namespace Subscriber
                 int bytesRead = state.Socket.EndReceive(result);
                 if(bytesRead > 0)
                 {
-                    var message = Encoding.ASCII.GetString(state.Buffer, 0, bytesRead);
+                    var message = Encoding.UTF8.GetString(state.Buffer, 0, bytesRead);
                     state.StringBuilder.Append(message);
                     if (message.IndexOf(JsonTokens.EndOfMessage, StringComparison.Ordinal) == -1)
                     {

@@ -84,7 +84,7 @@ namespace PubSubServer
             int bytesRead = state.Socket.EndReceive(result);
             if (bytesRead > 0)
             {
-                state.StringBuilder.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
+                state.StringBuilder.Append(Encoding.UTF8.GetString(state.Buffer, 0, bytesRead));
                 message = state.StringBuilder.ToString();
                 if (message.IndexOf(JsonTokens.EndOfMessage, StringComparison.Ordinal) > -1)
                 {
@@ -112,7 +112,7 @@ namespace PubSubServer
         private static void Send(string message, IEnumerable<SocketState> recipients)
         {
             message += JsonTokens.EndOfMessage;
-            var byteData = Encoding.ASCII.GetBytes(message);
+            var byteData = Encoding.UTF8.GetBytes(message);
             foreach (SocketState recipient in recipients)
             {
                 recipient.Socket.BeginSend(byteData, 0, byteData.Length, SocketFlags.None, new AsyncCallback(SendCallback), recipient.Socket);

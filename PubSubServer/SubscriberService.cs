@@ -4,6 +4,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using Primitives;
 using Service;
 using State;
 
@@ -73,12 +76,28 @@ namespace PubSubServer
             int bytesRead = state.Socket.EndReceive(result);
             if (bytesRead > 0)
             {
-                state.StringBuilder.Append(Encoding.ASCII.GetString(state.Buffer, 0, bytesRead));
+                state.StringBuilder.Append(Encoding.UTF8.GetString(state.Buffer, 0, bytesRead));
                 message = state.StringBuilder.ToString();
                 if (!string.IsNullOrEmpty(message))
                 {
                     Filtering.Filter.AddSubscriber(message, state);
+                    SendInitialData(state);
                 }
+            }
+        }
+
+        private static void SendInitialData(SocketState state)
+        {
+            var taskService = new TaskService();
+            var tasks = taskService.Get<Data.Task>();
+            foreach(var task in tasks)
+            {
+                JObject json =
+                new JObject(
+                    new JProperty(JsonTokens.State, StateEnum.Unchanged),
+                    new JProperty(JsonTokens.Data, JObject.FromObject(task)),
+                    new JProperty(JsonTokens.Topic, task.GetType().FullName));
+                PublisherService.ReplyToSender(json.ToString(), state);
             }
         }
     }

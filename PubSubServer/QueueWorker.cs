@@ -41,6 +41,7 @@ namespace PubSubServer
                             PublisherService.ReplyToSender(json.ToString(), socketState);
                             break;
                         }
+                        case StateEnum.Added:
                         case StateEnum.Modified:
                         {
                             PublisherService.Publish(json.ToString(), typeof(Task).FullName);

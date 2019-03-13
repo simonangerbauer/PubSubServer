@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Data;
@@ -17,32 +18,47 @@ namespace Service
             Context.Database.EnsureCreated();
         }
 
+        public IEnumerable<T> Get<T>() where T : Entity
+        {
+            var dBSet = Context.Set<T>();
+            return dBSet.AsEnumerable();
+        }
+
         public async Task<(StateEnum state, T data)> PostAsync<T>(T entity) where T : Entity
         {
-            var dbSet = Context.Set<T>();
-            var dbEntity = dbSet.SingleOrDefault(t => t.Id == entity.Id);
-            var state = StateEnum.Unchanged;
-
-            if (dbEntity != null)
+            try
             {
-                if(entity.LastChange > dbEntity.LastChange)
+
+                var dbSet = Context.Set<T>();
+                var dbEntity = dbSet.SingleOrDefault(t => t.Id == entity.Id);
+                var state = StateEnum.Unchanged;
+
+                if (dbEntity != null)
                 {
-                    Context.Update(entity);
-                    state = StateEnum.Modified;
+                    if (entity.LastChange > dbEntity.LastChange)
+                    {
+                        Context.Update(entity);
+                        state = StateEnum.Modified;
+                    }
+                    else
+                    {
+                        return (state, dbEntity);
+                    }
                 }
                 else
                 {
-                    return (state, dbEntity);
+                    await Context.AddAsync(entity);
+                    state = StateEnum.Added;
                 }
-            }
-            else
-            {
-                await Context.AddAsync(entity);
-                state = StateEnum.Added;
-            }
 
-            await Context.SaveChangesAsync();
-            return (state, entity);
+                await Context.SaveChangesAsync();
+                return (state, entity);
+            } 
+            catch (Exception ex)
+            {
+                Console.Write(ex.Message);
+            }
+            return (StateEnum.Unchanged, null);
         }
 
         public void Dispose()

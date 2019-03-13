@@ -6,7 +6,12 @@ namespace Data
 {
     public class Task : Entity
     {
-        public IEnumerable<Proof> Proofs { get; set; }
+        public Task()
+        {
+            Proofs = new List<Proof>();
+        }
+
+        public List<Proof> Proofs { get; set; }
 
         public String Officers { get; set; }
 
