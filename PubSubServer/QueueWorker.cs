@@ -25,10 +25,10 @@ namespace PubSubServer
         {
             while(true)
             {
-                (var entity, var socketState) = Queue.Dequeue();
+                (var entity, var entityState, var socketState) = Queue.Dequeue();
                 if (entity is Task)
                 {
-                    (var state, var data) = await _taskService.PostAsync<Task>((Task)entity);
+                    (var state, var data) = await _taskService.PostAsync<Task>((Task)entity, entityState);
                     JObject json =
                         new JObject(
                             new JProperty(JsonTokens.State, state),
@@ -37,16 +37,18 @@ namespace PubSubServer
                     switch (state)
                     {
                         case StateEnum.Unchanged:
-                        {
-                            PublisherService.ReplyToSender(json.ToString(), socketState);
-                            break;
-                        }
+                            {
+                                PublisherService.ReplyToSender(json.ToString(),  socketState);
+                                break;
+                            }
+                        case StateEnum.Deleted:
                         case StateEnum.Added:
                         case StateEnum.Modified:
-                        {
-                            PublisherService.Publish(json.ToString(), typeof(Task).FullName);
-                            break;
-                        }
+                            {
+                                PublisherService.ReplyToSender(json.ToString(), socketState);
+                                PublisherService.Publish(json.ToString(), typeof(Task).FullName);
+                                break;
+                            }
                     }
 
                 }

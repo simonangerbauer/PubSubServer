@@ -10,7 +10,7 @@ namespace PubSubServer
 {
     public static class Queue
     {
-        private static BlockingCollection<(Entity entity, SocketState socketState)> _queue = new BlockingCollection<(Entity, SocketState)>();
+        private static BlockingCollection<(Entity entity, StateEnum entityState, SocketState socketState)> _queue = new BlockingCollection<(Entity, StateEnum, SocketState)>();
 
         public static void Enqueue(SocketState state)
         {
@@ -21,8 +21,9 @@ namespace PubSubServer
                 JObject jObject = JObject.Parse(message);
                 var assembly = typeof(Entity).Assembly;
                 var type = assembly.GetType(jObject.SelectToken(JsonTokens.Topic).ToString());
+                var entityState = (StateEnum)int.Parse(jObject.SelectToken(JsonTokens.State).ToString());
                 var entity = (Entity)jObject.SelectToken(JsonTokens.Data).ToObject(type);
-                _queue.Add((entity, state));
+                _queue.Add((entity, entityState, state));
             }
             catch (Exception ex)
             {
@@ -30,7 +31,7 @@ namespace PubSubServer
             }
         }
 
-        public static (Entity entity, SocketState socketState) Dequeue()
+        public static (Entity entity, StateEnum entityState, SocketState socketState) Dequeue()
         {
             return _queue.Take();
         }

@@ -7,6 +7,6 @@ namespace Primitives
         Unchanged,
         Modified, 
         Added,
-        Deleted
+        Deleted = 3
     }
 }

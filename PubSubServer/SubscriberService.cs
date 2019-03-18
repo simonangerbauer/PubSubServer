@@ -80,9 +80,26 @@ namespace PubSubServer
                 message = state.StringBuilder.ToString();
                 if (!string.IsNullOrEmpty(message))
                 {
-                    Filtering.Filter.AddSubscriber(message, state);
-                    SendInitialData(state);
+                    var messageSplit = message.Split(",");
+                    if (messageSplit[0] == "Subscribe")
+                    {
+                        Filtering.Filter.AddSubscriber(messageSplit[1], state);
+                        SendInitialData(state);
+                    }
+                    else if (messageSplit[0] == "Resubscribe")
+                    {
+                        Filtering.Filter.AddSubscriber(messageSplit[1], state);
+
+                    } 
+                    else if(messageSplit[0] == "Unsubscribe")
+                    {
+                        Filtering.Filter.RemoveSubscriber(messageSplit[1], state);
+                    }
                 }
+            }
+            else
+            {
+                state.Socket.Disconnect(true);
             }
         }
 

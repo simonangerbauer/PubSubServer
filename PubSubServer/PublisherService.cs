@@ -73,15 +73,21 @@ namespace PubSubServer
             Socket handler = listener.EndAccept(result);
             SocketState state = new SocketState(handler);
             handler.BeginReceive(state.Buffer, 0, SocketState.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
-
         }
 
         private static void ReceiveCallback(IAsyncResult result)
         {
             string message = string.Empty;
             SocketState state = (SocketState)result.AsyncState;
-  
-            int bytesRead = state.Socket.EndReceive(result);
+
+            int bytesRead = 0;
+            try { 
+                bytesRead = state.Socket.EndReceive(result);
+            } catch (SocketException)
+            {
+                state.Socket.Disconnect(true);
+            }
+
             if (bytesRead > 0)
             {
                 state.StringBuilder.Append(Encoding.UTF8.GetString(state.Buffer, 0, bytesRead));
@@ -91,11 +97,8 @@ namespace PubSubServer
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}", message.Length, message);
                     Queue.Enqueue(state);
                 }
-                else
-                { 
-                    state.Socket.BeginReceive(state.Buffer, 0, SocketState.BufferSize, 0,
-                    new AsyncCallback(ReceiveCallback), state);
-                }
+                state.Socket.BeginReceive(state.Buffer, 0, SocketState.BufferSize, 0,
+                new AsyncCallback(ReceiveCallback), state);
             }
         }
 

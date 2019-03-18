@@ -16,9 +16,9 @@ namespace Service
             return await Context.GetQuery<Data.Task>().OrderByDescending(t => t.Due).ToListAsync();
         }
 
-        public async Task<(StateEnum state, Data.Task data)> PostAsync(Data.Task task)
+        public async Task<(StateEnum state, Data.Task data)> PostAsync(Data.Task task, StateEnum entityState)
         {
-            return await PostAsync<Data.Task>(task);
+            return await PostAsync<Data.Task>(task, entityState);
         }
     }
 }

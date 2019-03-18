@@ -15,6 +15,8 @@ namespace Service
         protected BaseService()
         {
             Context = new DatabaseContext();
+
+            Context.Database.EnsureDeleted();
             Context.Database.EnsureCreated();
         }
 
@@ -24,13 +26,13 @@ namespace Service
             return dBSet.AsEnumerable();
         }
 
-        public async Task<(StateEnum state, T data)> PostAsync<T>(T entity) where T : Entity
+        public async Task<(StateEnum state, T data)> PostAsync<T>(T entity, StateEnum entityState) where T : Entity
         {
             try
             {
 
                 var dbSet = Context.Set<T>();
-                var dbEntity = dbSet.SingleOrDefault(t => t.Id == entity.Id);
+                var dbEntity = dbSet.SingleOrDefault(t => t.Id.ToString().ToLower() == entity.Id.ToString().ToLower());
                 var state = StateEnum.Unchanged;
 
                 if (dbEntity != null)
@@ -45,7 +47,12 @@ namespace Service
                         return (state, dbEntity);
                     }
                 }
-                else
+                else if (entityState == StateEnum.Deleted)
+                {
+                    Context.Remove(entity);
+                    state = StateEnum.Deleted;
+                }
+                else 
                 {
                     await Context.AddAsync(entity);
                     state = StateEnum.Added;
