@@ -68,7 +68,8 @@ namespace Service
                     {
                         if (entity.LastChange > dbEntity.LastChange)
                         {
-                            Context.Update(entity);
+                            Context.Remove(dbEntity);
+                            Context.Add(entity);
                             state = StateEnum.Modified;
                         }
                         else

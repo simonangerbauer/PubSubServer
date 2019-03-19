@@ -10,7 +10,7 @@ using State;
 namespace Publisher
 {
     /// <summary>
-    /// Test project for publishing, not used by service.
+    /// Test project for publishing, not used by service.S
     /// </summary>
     class Publisher
     {
@@ -29,7 +29,7 @@ namespace Publisher
         {
             try
             {
-                string serverIP = "127.0.0.1";
+                string serverIP = "172.20.10.2";
                 IPAddress serverIPAddress = IPAddress.Parse(serverIP);
                 int serverPort = 10002;
 

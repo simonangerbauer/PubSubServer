@@ -45,7 +45,7 @@ namespace PubSubServer
         /// </summary>
         private void HostPublisherService()
         {
-            IPAddress ip = IPAddress.Parse("127.0.0.1");
+            IPAddress ip = IPAddress.Parse("172.20.10.2");
             IPEndPoint endpoint = new IPEndPoint(ip, 10002);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
