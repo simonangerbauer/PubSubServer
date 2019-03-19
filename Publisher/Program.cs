@@ -9,6 +9,9 @@ using State;
 
 namespace Publisher
 {
+    /// <summary>
+    /// Test project for publishing, not used by service.
+    /// </summary>
     class Publisher
     {
         Socket _client;

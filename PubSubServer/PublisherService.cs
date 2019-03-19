@@ -14,22 +14,35 @@ using State;
 
 namespace PubSubServer
 {
+    /// <summary>
+    /// Service for publishers to send data to
+    /// </summary>
     public class PublisherService
     {
         private static ManualResetEvent _resetEvent = new ManualResetEvent(false);
         private readonly TaskService _taskService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:PubSubServer.PublisherService"/> class.
+        /// </summary>
+        /// <param name="taskService">Task service.</param>
         public PublisherService(TaskService taskService)
         {
             _taskService = taskService;
         }
 
+        /// <summary>
+        /// Start this instance.
+        /// </summary>
         public void Start()
         {
             Thread thread = new Thread(new ThreadStart(HostPublisherService)) { IsBackground = false };
             thread.Start();
         }
 
+        /// <summary>
+        /// Hosts the publisher service.
+        /// </summary>
         private void HostPublisherService()
         {
             IPAddress ip = IPAddress.Parse("127.0.0.1");
@@ -60,11 +73,20 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// Replies to sender if his message has been applied.
+        /// </summary>
+        /// <param name="message">Message.</param>
+        /// <param name="socketState">Socket state.</param>
         public static void ReplyToSender(string message, SocketState socketState)
         {
             Send(message, new List<SocketState> { socketState });
         }
 
+        /// <summary>
+        /// Callback of the Accept of the socket
+        /// </summary>
+        /// <param name="result">Result.</param>
         private static void AcceptCallback(IAsyncResult result)
         {
             _resetEvent.Set();
@@ -75,6 +97,10 @@ namespace PubSubServer
             handler.BeginReceive(state.Buffer, 0, SocketState.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
         }
 
+        /// <summary>
+        /// Callback of the Receive of the socket
+        /// </summary>
+        /// <param name="result">Result.</param>
         private static void ReceiveCallback(IAsyncResult result)
         {
             string message = string.Empty;
@@ -102,6 +128,11 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// Publish the specified message to topic.
+        /// </summary>
+        /// <param name="message">Message.</param>
+        /// <param name="topic">Topic.</param>
         public static void Publish(string message, string topic)
         {
             IEnumerable<SocketState> subscribers = Filtering.Filter.GetSubscribers(topic);
@@ -112,6 +143,11 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// Send the specified message to recipients.
+        /// </summary>
+        /// <param name="message">Message.</param>
+        /// <param name="recipients">Recipients.</param>
         private static void Send(string message, IEnumerable<SocketState> recipients)
         {
             message += JsonTokens.EndOfMessage;
@@ -122,6 +158,10 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// The Callback for the Send of the socket
+        /// </summary>
+        /// <param name="result">Result.</param>
         private static void SendCallback(IAsyncResult result)
         {
             try
@@ -136,6 +176,11 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// Makes the comma separated string.
+        /// </summary>
+        /// <returns>The comma separated string.</returns>
+        /// <param name="eventParts">Event parts.</param>
         private string MakeCommaSeparatedString(List<string> eventParts)
         {
             string message = string.Empty;
@@ -152,12 +197,27 @@ namespace PubSubServer
         }
     }
 
+    /// <summary>
+    /// Worker thread parameters.
+    /// </summary>
     class WorkerThreadParameters
     {
+        /// <summary>
+        /// Gets or sets the server.
+        /// </summary>
+        /// <value>The server.</value>
         public Socket Server { get; set; }
 
+        /// <summary>
+        /// Gets or sets the message.
+        /// </summary>
+        /// <value>The message.</value>
         public string Message { get; set; }
 
+        /// <summary>
+        /// Gets or sets the subscribers.
+        /// </summary>
+        /// <value>The subscribers.</value>
         public IEnumerable<EndPoint> Subscribers { get; set; }
     }
 }

@@ -9,6 +9,9 @@ using State;
 
 namespace Subscriber
 {
+    /// <summary>
+    /// Test project for a subscriber, not used in the service
+    /// </summary>
     class Subscriber
     {
         Socket _client;

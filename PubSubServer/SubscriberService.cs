@@ -12,22 +12,35 @@ using State;
 
 namespace PubSubServer
 {
+    /// <summary>
+    /// Service that accepts subscribers on a socket
+    /// </summary>
     public class SubscriberService
     {
         private static ManualResetEvent _resetEvent = new ManualResetEvent(false);
         private readonly TaskService _taskService;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:PubSubServer.SubscriberService"/> class.
+        /// </summary>
+        /// <param name="taskService">Task service.</param>
         public SubscriberService(TaskService taskService)
         {
             _taskService = taskService;
         }
 
+        /// <summary>
+        /// Start this instance on a new thread.
+        /// </summary>
         public void Start()
         {
             Thread thread = new Thread(new ThreadStart(HostSubscriberService)) { IsBackground = false };
             thread.Start();
         }
 
+        /// <summary>
+        /// Hosts the subscriber service.
+        /// </summary>
         private void HostSubscriberService()
         {
             IPAddress ip = IPAddress.Parse("127.0.0.1");
@@ -57,6 +70,10 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// Callback for the Accept of the socket
+        /// </summary>
+        /// <param name="result">Result.</param>
         private static void AcceptCallback(IAsyncResult result)
         {
             _resetEvent.Set();
@@ -68,6 +85,10 @@ namespace PubSubServer
 
         }
 
+        /// <summary>
+        /// Callback for the receive of the socket
+        /// </summary>
+        /// <param name="result">Result.</param>
         private static void ReceiveCallback(IAsyncResult result)
         {
             string message = string.Empty;
@@ -103,6 +124,10 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// Sends the initial data to a first subscriber.
+        /// </summary>
+        /// <param name="state">State.</param>
         private static void SendInitialData(SocketState state)
         {
             var taskService = new TaskService();

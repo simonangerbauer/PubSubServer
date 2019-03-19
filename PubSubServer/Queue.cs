@@ -8,10 +8,21 @@ using State;
 
 namespace PubSubServer
 {
+    /// <summary>
+    /// Queue of items to enter into the database.
+    /// </summary>
     public static class Queue
     {
+        /// <summary>
+        /// The queue of entities with their entity states and their sender socket states
+        /// Collection blocks on dequeue if no element is in it
+        /// </summary>
         private static BlockingCollection<(Entity entity, StateEnum entityState, SocketState socketState)> _queue = new BlockingCollection<(Entity, StateEnum, SocketState)>();
 
+        /// <summary>
+        /// Enqueue an object from a sender socket.
+        /// </summary>
+        /// <param name="state">State.</param>
         public static void Enqueue(SocketState state)
         {
             try
@@ -31,6 +42,10 @@ namespace PubSubServer
             }
         }
 
+        /// <summary>
+        /// Dequeue an item.
+        /// </summary>
+        /// <returns>The item.</returns>
         public static (Entity entity, StateEnum entityState, SocketState socketState) Dequeue()
         {
             return _queue.Take();

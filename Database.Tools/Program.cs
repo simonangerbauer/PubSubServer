@@ -5,6 +5,9 @@ using Newtonsoft.Json;
 
 namespace Database.Tools
 {
+    /// <summary>
+    /// Test project for database connection, not used in service
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
